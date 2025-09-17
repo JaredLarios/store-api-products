@@ -168,7 +168,7 @@ export class ProductService {
 
     const query = `
         DELETE FROM store.item
-	    WHERE item_uuid = $1;
+	      WHERE item_uuid = $1;
     `;
 
     await this.databaseService.query(query, [itemUuid]).catch((error) => {
