@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsDate, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { generateUuid } from 'utils';
+import { generateUuid } from 'src/utils';
 
 export class ProductDTO {
   @ApiProperty({ required: false })

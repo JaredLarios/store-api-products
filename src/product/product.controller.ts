@@ -9,7 +9,6 @@ import {
   Query,
   HttpStatus,
   HttpException,
-  Param,
 } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 import { ProductService } from './product.service';

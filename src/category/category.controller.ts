@@ -9,7 +9,6 @@ import {
   Query,
   HttpStatus,
   HttpException,
-  Param,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Response } from 'express';

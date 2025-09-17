@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
-import { generateUuid } from 'utils';
+import { generateUuid } from 'src/utils';
 
 export class CategoryDTO {
   @ApiProperty({ required: false })

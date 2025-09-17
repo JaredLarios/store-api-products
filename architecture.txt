@@ -1,0 +1,44 @@
+store-api-products
+│   api-products
+    ├── src
+    │   ├── category
+    │   │   ├── dto
+    │   │   │   ├── category-product.dto.ts
+    │   │   │   └── category.dto.ts
+    │   │   ├── interfaces
+    │   │   │   ├── category-product.interface.ts
+    │   │   │   └── category.interface.ts
+    │   │   ├── category.controller.ts
+    │   │   ├── category.module.ts
+    │   │   └── category.service.ts
+    │   ├── product
+    │   │   ├── dto
+    │   │   │   ├── product.dto.ts
+    │   │   │   └── update-product.dto.ts
+    │   │   ├── interfaces
+    │   │   │   └── product.interface.ts
+    │   │   ├── product.controller.ts
+    │   │   ├── product.module.ts
+    │   │   └── product.service.ts
+    │   ├── services
+    │   │   ├── database.module.ts
+    │   │   └── database.service.ts
+    │   ├── validation
+    │   │   └── validation.pipe.ts
+    │   ├── app.controller.spec.ts
+    │   ├── app.controller.ts
+    │   ├── app.middleware.ts
+    │   ├── app.module.ts
+    │   ├── app.service.ts
+    │   ├── main.ts
+    │   └── utils.ts
+    ├── test
+    │   ├── app.e2e-spec.ts
+    │   └── jest-e2e.json
+    ├── eslint.config.mjs
+    ├── nest-cli.json
+    ├── package.json
+    ├── README.md
+    ├── tsconfig.build.json
+    ├── tsconfig.json
+    └── yarn.lock
