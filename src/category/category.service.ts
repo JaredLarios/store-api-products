@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../services/database.service';
 import {
-  Categories,
   CategoryWithoutId,
   DeleteCategory,
   NewCategory,
