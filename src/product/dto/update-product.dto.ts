@@ -10,7 +10,7 @@ export class UpdateProductDTO {
 
   @ApiProperty({ required: false })
   @IsString()
-  @Optional()
+  @IsOptional()
   item_name?: string;
 
   @ApiProperty({ required: false })
@@ -40,6 +40,6 @@ export class UpdateProductDTO {
   @ApiProperty({ required: false })
   @IsNumber()
   @Min(0)
-  @Optional()
+  @IsOptional()
   item_quantity?: number;
 }

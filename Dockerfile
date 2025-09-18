@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose port (adjust if needed)
-EXPOSE 8085
+EXPOSE 8095
 
 # Start the application
 CMD npm run build && npm run start:prod

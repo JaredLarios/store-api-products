@@ -43,6 +43,7 @@ export class ProductController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
     return res.status(HttpStatus.CREATED).json({ message: 'product created' });
   }
 
@@ -57,7 +58,7 @@ export class ProductController {
       );
     }
 
-    return res.status(HttpStatus.ACCEPTED).json({ message: 'prduct updated' });
+    return res.status(HttpStatus.ACCEPTED).json({ message: 'product updated' });
   }
 
   @Delete()

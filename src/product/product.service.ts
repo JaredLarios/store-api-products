@@ -27,14 +27,20 @@ export class ProductService {
         VALUES ( $1, $2, $3, $4, $5, $6, $7);
     `;
 
-    await this.databaseService
-      .query<
-        any[]
-      >(query, [newProduct.item_uuid, newProduct.item_name, newProduct.item_price, newProduct.item_price_off || null, newProduct.item_image_url || null, newProduct.item_price_off_until_date || null, newProduct.item_quantity])
-      .catch((error) => {
-        console.log(error);
-        return false;
-      });
+    try {
+      await this.databaseService.query<any[]>(query, [
+        newProduct.item_uuid,
+        newProduct.item_name,
+        newProduct.item_price,
+        newProduct.item_price_off || null,
+        newProduct.item_image_url || null,
+        newProduct.item_price_off_until_date || null,
+        newProduct.item_quantity,
+      ]);
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
 
     return true;
   }
@@ -59,17 +65,24 @@ export class ProductService {
         WHERE item_uuid = $8;
     `;
 
-    await this.databaseService
-      .query<
-        any[]
-      >(query, [product.item_name ?? null, product.item_price ?? null, product.item_price_off ?? null, product.item_image_url ?? null, product.item_price_off_until_date ?? null, new Date(), product.item_quantity ?? null, product.item_uuid])
-      .catch((error) => {
-        console.log(error);
-        throw new HttpException(
-          error as string,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      });
+    try {
+      await this.databaseService.query<any[]>(query, [
+        product.item_name ?? null,
+        product.item_price ?? null,
+        product.item_price_off ?? null,
+        product.item_image_url ?? null,
+        product.item_price_off_until_date ?? null,
+        new Date(),
+        product.item_quantity ?? null,
+        product.item_uuid,
+      ]);
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        error as string,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
     return true;
   }
@@ -139,8 +152,8 @@ export class ProductService {
       const query = `
             SELECT  item_uuid,
                     item_name,
-                    item_price,
-                    item_price_off,
+                    item_price::float8 AS item_price,
+                    item_price_off::float8 AS item_price_off,
                     item_image_url,
                     item_price_off_until_date,
                     item_created_at,
@@ -171,10 +184,12 @@ export class ProductService {
 	      WHERE item_uuid = $1;
     `;
 
-    await this.databaseService.query(query, [itemUuid]).catch((error) => {
+    try {
+      await this.databaseService.query(query, [itemUuid]);
+    } catch (error) {
       console.log(error);
       return false;
-    });
+    }
 
     return true;
   }

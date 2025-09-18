@@ -12,13 +12,13 @@ import {
 export class CategoryService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async getCategories(): Promise<CategoryWithoutId> {
+  async getCategories(): Promise<CategoryWithoutId[]> {
     const query = `
-          SELECT category_id, category_uuid, category_name
+          SELECT category_uuid, category_name
 	        FROM store.category;
       `;
 
-    const response = await this.databaseService.query<Categories>(query);
+    const response = await this.databaseService.query<CategoryWithoutId[]>(query);
 
     if (!response) {
       throw new HttpException(
@@ -37,14 +37,15 @@ export class CategoryService {
       VALUES ($1, $2);
     `;
 
-    await this.databaseService
-      .query<
-        any[]
-      >(query, [newCategory.category_uuid, newCategory.category_name])
-      .catch((error) => {
-        console.log(error);
-        return false;
-      });
+    try {
+      await this.databaseService.query<any[]>(query, [
+        newCategory.category_uuid,
+        newCategory.category_name,
+      ]);
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
 
     return true;
   }
@@ -62,12 +63,15 @@ export class CategoryService {
       WHERE category_uuid = $2;
     `;
 
-    await this.databaseService
-      .query<any[]>(query, [category.category_name, category.category_uuid])
-      .catch((error) => {
-        console.log(error);
-        return false;
-      });
+    try {
+      await this.databaseService.query<any[]>(query, [
+        category.category_name,
+        category.category_uuid,
+      ]);
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
 
     return true;
   }
@@ -84,12 +88,12 @@ export class CategoryService {
           WHERE category_uuid = $1;
     `;
 
-    await this.databaseService
-      .query<any[]>(query, [category.category_uuid])
-      .catch((error) => {
-        console.log(error);
-        return false;
-      });
+    try {
+      await this.databaseService.query<any[]>(query, [category.category_uuid]);
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
 
     return true;
   }
