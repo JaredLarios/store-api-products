@@ -18,7 +18,8 @@ export class CategoryService {
 	        FROM store.category;
       `;
 
-    const response = await this.databaseService.query<CategoryWithoutId[]>(query);
+    const response =
+      await this.databaseService.query<CategoryWithoutId[]>(query);
 
     if (!response) {
       throw new HttpException(

@@ -49,7 +49,7 @@ export class CategoryController {
 
     if (!response) {
       throw new HttpException(
-        'The new category could not be added',
+        'The new category could not be updated',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -66,7 +66,7 @@ export class CategoryController {
 
     if (!response) {
       throw new HttpException(
-        'The new category could not be added',
+        'The new category could not be deleted',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
