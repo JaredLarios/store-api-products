@@ -5,6 +5,7 @@ import {
   ProductI,
   ProductsQueries,
   ResponseI,
+  SingleProductQueries,
   TotalItems,
   UpdateProduct,
 } from './interfaces/product.interface';
@@ -87,6 +88,38 @@ export class ProductService {
     return true;
   }
 
+  async findSingleProduct(
+    queries: Partial<SingleProductQueries>,
+  ): Promise<ProductI> {
+    const query = `
+            SELECT  item_uuid,
+                    item_name,
+                    item_price::float8 AS item_price,
+                    item_price_off::float8 AS item_price_off,
+                    item_image_url,
+                    item_price_off_until_date,
+                    item_created_at,
+                    item_updated_at,
+                    item_quantity,
+                    c.category_name
+                  FROM store.item i
+                  LEFT JOIN store.item_has_category ic ON ic.item_id = i.item_id
+                  LEFT JOIN store.category c ON c.category_id = ic.category_id
+                  WHERE item_uuid = $1 ;
+                  `;
+
+    const response = await this.databaseService.query<ProductI[]>(query, [
+      queries.item_uuid,
+    ]);
+    console.log(query, queries, response);
+
+    if (response.length <= 0) {
+      throw new HttpException('Item not Found', HttpStatus.NOT_FOUND);
+    }
+
+    return response[0];
+  }
+
   async findProducts(
     queries: Partial<ProductsQueries>,
   ): Promise<ResponseI<ProductI>> {
@@ -125,11 +158,11 @@ export class ProductService {
 
     if (queries.category_uuid) {
       const query = `
-            SELECT 	i.item_id,
+            SELECT
                 item_uuid,
                 item_name,
-                item_price,
-                item_price_off,
+                item_price::float8 AS item_price,
+                item_price_off::float8 AS item_price_off,
                 item_image_url,
                 item_price_off_until_date,
                 item_created_at,

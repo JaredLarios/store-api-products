@@ -27,6 +27,8 @@ export type ProductsQueries = Pick<
   'category_uuid' | 'page' | 'quantity'
 >;
 
+export type SingleProductQueries = Pick<ProductI, 'item_uuid'>;
+
 export type ProductI = Omit<ProductsI, 'page' | 'quantity' | 'category_uuid'>;
 
 export type TotalItems = Pick<PaginationI, 'total_items'>;

@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 import { ProductService } from './product.service';
-import { DeleteProduct, ProductsQueries } from './interfaces/product.interface';
+import {
+  DeleteProduct,
+  ProductsQueries,
+  SingleProductQueries,
+} from './interfaces/product.interface';
 import { Response } from 'express';
 import { ProductDTO } from './dto/product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
@@ -21,7 +25,7 @@ import { UpdateProductDTO } from './dto/update-product.dto';
 export class ProductController {
   constructor(private productService: ProductService) {}
 
-  @Get()
+  @Get('/all')
   @ApiQuery({ name: 'category_uuid', type: String, required: false })
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'quantity', type: Number, required: false })
@@ -30,6 +34,16 @@ export class ProductController {
     @Res() res: Response,
   ) {
     const response = await this.productService.findProducts(queries);
+    return res.status(HttpStatus.OK).json(response);
+  }
+
+  @Get()
+  @ApiQuery({ name: 'item_uuid', type: String })
+  async getSingleProduct(
+    @Query() queries: SingleProductQueries,
+    @Res() res: Response,
+  ) {
+    const response = await this.productService.findSingleProduct(queries);
     return res.status(HttpStatus.OK).json(response);
   }
 
