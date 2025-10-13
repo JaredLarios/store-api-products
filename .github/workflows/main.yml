@@ -23,25 +23,6 @@ jobs:
       with:
         node-version: '22.14'
         cache: "npm"
-<<<<<<< HEAD
-      - name: Install dependencies
-        run: |
-          npm install -g yarn
-          yarn install
-      - name: Lint with Eslint
-        run: |
-          yarn run lint
-      
-    analyze:
-      needs: build
-      name: Analyze
-      runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
-      timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
-      permissions:
-        actions: read
-        contents: read
-        security-events: write
-=======
     - name: Install dependencies
       run: |
         npm install -g yarn
@@ -59,7 +40,6 @@ jobs:
       actions: read
       contents: read
       security-events: write
->>>>>>> 8ec2ff8424ef2c5004cf22ebb1335fcd9b8db1e3
 
     strategy:
       fail-fast: false
