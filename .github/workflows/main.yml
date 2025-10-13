@@ -29,7 +29,7 @@ on:
           yarn install
       - name: Lint with Eslint
         run: |
-          yarn run Lint
+          yarn run lint
       
     analyze:
       needs: build
