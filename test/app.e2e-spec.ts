@@ -22,4 +22,8 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
   });
+  it('/ (GET) should not contain secret', async () => {
+    const response = await request(app.getHttpServer()).get('/');
+    expect(response.text).not.toContain('secret');
+  });
 });
