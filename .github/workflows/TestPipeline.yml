@@ -20,6 +20,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: Test
     steps:
       - name: Checkout the latest code
         uses: actions/checkout@v4.1.2
