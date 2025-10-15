@@ -24,6 +24,6 @@ describe('AppController (e2e)', () => {
   });
   it('/ (GET) should not contain secret', async () => {
     const response = await request(app.getHttpServer()).get('/');
-    expect(response.text).not.toContain('None Secrets');
+    expect(response.text).not.toContain('secrets');
   });
 });
