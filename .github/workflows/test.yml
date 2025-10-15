@@ -1,42 +1,35 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: CI/CD Pull Requests Pipeline CSE 270
+name: 'QA Pipeline'
 
 on:
+  push:
+    branches: ['test']
   pull_request:
-    branches: ["master", "staging"]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches: ['test']
+    types: [synchronize, labeled, opened, reopened, ready_for_review]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: Test
     steps:
-    - name: Checkout the latest code
-      uses: actions/checkout@v4.1.2
-    - name: Setup Node.js 22
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.14'
-        cache: "npm"
-    - name: Install dependencies
-      run: |
-        npm install -g yarn
-        yarn install
-    
-    - name: Lint with Eslint
-      run: |
-        yarn run lint
+      - name: Checkout the latest code
+        uses: actions/checkout@v4.1.2
+      - name: Setup Node 22
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: 22.14.0
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install
+      - name: Lint with Eslint
+        run: |
+          yarn run lint
+      - name: Run Tests
+        run: |
+          yarn test
 
-    - name: Run tests
-      run: |
-        yarn run test
-
-    
   analyze:
     needs: build
     name: Analyze
@@ -94,31 +87,40 @@ jobs:
 
   deploy:
     needs: analyze
-    environment:
-
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
+      - name: Check if PR is mergeable
+        id: mergeable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Checking if PR #$PR_NUMBER is mergeable..."
 
-      - name: Install dependencies
-        run: npm install
+          # Fetch PR info from GitHub API
+          response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER)
 
-      - name: Build project
-        run: npm run build
+          mergeable=$(echo "$response" | jq -r '.mergeable')
+          mergeable_state=$(echo "$response" | jq -r '.mergeable_state')
 
-      #- name: Install Vercel CLI
-      #  run: npm install -g vercel
+          echo "mergeable=$mergeable"
+          echo "mergeable_state=$mergeable_state"
 
-      #- name: Deploy to Vercel
-      #  env:
-      #    VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      #  run: |
-      #    vercel --prod --confirm --token $VERCEL_TOKEN
+          if [ "$mergeable" != "true" ]; then
+            echo "❌ Pull request has conflicts or is not mergeable (state: $mergeable_state)."
+            exit 1
+          fi
 
+      - name: Merge Pull Request
+        if: steps.mergeable.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Merging PR #$PR_NUMBER..."
+          gh pr merge $PR_NUMBER --merge --admin 
