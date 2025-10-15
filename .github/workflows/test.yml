@@ -1,0 +1,126 @@
+name: 'QA Pipeline'
+
+on:
+  push:
+    branches: ['test']
+  pull_request:
+    branches: ['test']
+    types: [synchronize, labeled, opened, reopened, ready_for_review]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: Test
+    steps:
+      - name: Checkout the latest code
+        uses: actions/checkout@v4.1.2
+      - name: Setup Node 22
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: 22.14.0
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install
+      - name: Lint with Eslint
+        run: |
+          yarn run lint
+      - name: Run Tests
+        run: |
+          yarn test
+
+  analyze:
+    needs: build
+    name: Analyze
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript"]
+          # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby', 'swift' ]
+          # Use only 'java' to analyze code written in Java, Kotlin or both
+          # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+          # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.2
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+
+          # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          # queries: security-extended,security-and-quality
+
+    # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
+    # If this step fails, then you should remove it and run the build manually (see below)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+
+    #   If the Autobuild fails above, remove it and uncomment the following three lines.
+    #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
+
+    # - run: |
+    #     echo "Run, Build Application using script"
+    #     ./location_of_script_within_repo/buildscript.sh
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+        # Single deploy job since we're just deploying
+
+  deploy:
+    needs: analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Check if PR is mergeable
+        id: mergeable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Checking if PR #$PR_NUMBER is mergeable..."
+
+          # Fetch PR info from GitHub API
+          response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER)
+
+          mergeable=$(echo "$response" | jq -r '.mergeable')
+          mergeable_state=$(echo "$response" | jq -r '.mergeable_state')
+
+          echo "mergeable=$mergeable"
+          echo "mergeable_state=$mergeable_state"
+
+          if [ "$mergeable" != "true" ]; then
+            echo "❌ Pull request has conflicts or is not mergeable (state: $mergeable_state)."
+            exit 1
+          fi
+
+      - name: Merge Pull Request
+        if: steps.mergeable.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Merging PR #$PR_NUMBER..."
+          gh pr merge $PR_NUMBER --merge --admin 
