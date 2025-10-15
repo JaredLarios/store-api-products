@@ -93,7 +93,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Check if triggered by PR
+        id: check_pr
+        run: |
+          if [ -z "${{ github.event.pull_request.number }}"]; then
+            echo "is_pr=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Not a pull request event — skipping merge step."
+          else
+            echo "is_pr=true" >> $GITHUB_OUTPUT
+            echo "✅ Pull request event detected (#${{ github.event.pull_request.number }})"
+          fi
+
       - name: Check if PR is mergeable
+        if: steps.check_pr.outputs.is_pr == 'true'
         id: mergeable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -123,4 +135,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           echo "Merging PR #$PR_NUMBER..."
+          gh auth setup-git
+          gh auth status
           gh pr merge $PR_NUMBER --merge --admin 
