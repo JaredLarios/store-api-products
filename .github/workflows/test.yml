@@ -123,4 +123,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           echo "Merging PR #$PR_NUMBER..."
+          gh auth setup-git
+          gh auth status
           gh pr merge $PR_NUMBER --merge --admin 
