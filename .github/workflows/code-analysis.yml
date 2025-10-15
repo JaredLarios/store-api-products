@@ -8,7 +8,21 @@ on:
         type: string
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.split.outputs.matrix }}
+    steps:
+      - name: Split languages
+        id: split
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const langs = core.getInput("language").split(",").map(x => x.trim());
+            core.setOutput("matrix", JSON.stringify(langs));
+  
   analyze:
+    needs: prepare
     name: Analyze
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
@@ -21,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         language:
-          ${{ inputs.language }}
+          ${{ fromJSON(needs.prepare.outputs.matrix) }}
           # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby', 'swift' ]
           # Use only 'java' to analyze code written in Java, Kotlin or both
           # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
