@@ -42,7 +42,7 @@ jobs:
 
     - name: Run tests
       run: |
-        yarn run test
+        yarn run test:cov
 
     
   analyze:
