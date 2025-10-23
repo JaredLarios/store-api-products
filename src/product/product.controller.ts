@@ -30,7 +30,7 @@ export class ProductController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'quantity', type: Number, required: false })
   async getAllProducts(
-    @Query() queries: ProductsQueries,
+    @Query() queries: Partial<ProductsQueries>,
     @Res() res: Response,
   ) {
     const response = await this.productService.findProducts(queries);
